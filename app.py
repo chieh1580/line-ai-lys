@@ -1148,12 +1148,12 @@ def index():
 # ===== Rich Menu 設定 =====
 @app.route("/setup-richmenu")
 def setup_richmenu():
-    """一次性設定：建立 Rich Menu + 產生底圖 + 上傳 + 設為預設"""
+    """一次性設定：建立 Rich Menu + 用自訂底圖 + 上傳 + 設為預設"""
     if request.cookies.get("admin_auth") != ADMIN_PASSWORD:
         return jsonify({"error": "unauthorized"}), 401
 
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        from PIL import Image
     except ImportError:
         return jsonify({"error": "Pillow not installed"}), 500
 
@@ -1196,114 +1196,18 @@ def setup_richmenu():
         return jsonify({"error": "create richmenu failed", "detail": r.text}), 500
     richmenu_id = r.json()["richMenuId"]
 
-    # Step 3: 用 PIL 產生底圖（LYS 風格：大地色、溫暖質感）
-    W, H = 2500, 1686
-    cell_w, cell_h = 833, 843
-    GAP = 4
-
-    FONT_CANDIDATES = [
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "NotoSansTC-Regular.otf"),
-        "/app/NotoSansTC-Regular.otf",
-        "NotoSansTC-Regular.otf",
-        "C:/Windows/Fonts/msjh.ttc",
-    ]
-
-    def _load_font(size):
-        for fp in FONT_CANDIDATES:
-            try:
-                return ImageFont.truetype(fp, size)
-            except Exception:
-                pass
-        return ImageFont.load_default()
-
-    font_title = _load_font(80)
-    font_sub = _load_font(40)
-    font_icon = _load_font(100)
-
-    # 六格設定 — 大地色系，呼應 LYS 的自然溫暖風格
-    cells = [
-        {"bg1": "#5c4a3a", "bg2": "#4a3828", "accent": "#c8a882", "icon": "\u2714", "title": "線上預約", "sub": "立即預約撥經體驗"},
-        {"bg1": "#5c4a3a", "bg2": "#4a3828", "accent": "#c8a882", "icon": "\u2728", "title": "尋找專屬指南", "sub": "服務項目與價格"},
-        {"bg1": "#5c4a3a", "bg2": "#4a3828", "accent": "#c8a882", "icon": "\u2605", "title": "新客推薦", "sub": "第一次體驗最划算"},
-        {"bg1": "#6b5a4a", "bg2": "#5a4838", "accent": "#d4b896", "icon": "\u2302", "title": "來找我們", "sub": "中壢志航街217號"},
-        {"bg1": "#6b5a4a", "bg2": "#5a4838", "accent": "#d4b896", "icon": "?", "title": "撥筋解惑室", "sub": "撥經是什麼？會痛嗎？"},
-        {"bg1": "#6b5a4a", "bg2": "#5a4838", "accent": "#d4b896", "icon": "\u2261", "title": "療癒套餐", "sub": "超值組合一次看"},
-    ]
-
-    img = Image.new("RGB", (W, H), "#3a2a1a")
-    draw = ImageDraw.Draw(img)
-
-    for i, cell in enumerate(cells):
-        col = i % 3
-        row = i // 3
-        x = col * cell_w + (GAP if col > 0 else 0)
-        y = row * cell_h + (GAP if row > 0 else 0)
-        w = cell_w - (GAP if col < 2 else 0)
-        h = cell_h - (GAP if row < 1 else 0)
-
-        # 漸層背景（大地色）
-        steps = 20
-        r1, g1, b1 = int(cell["bg1"][1:3], 16), int(cell["bg1"][3:5], 16), int(cell["bg1"][5:7], 16)
-        r2, g2, b2 = int(cell["bg2"][1:3], 16), int(cell["bg2"][3:5], 16), int(cell["bg2"][5:7], 16)
-        for s in range(steps):
-            t = s / steps
-            cr = int(r1 + (r2 - r1) * t)
-            cg = int(g1 + (g2 - g1) * t)
-            cb = int(b1 + (b2 - b1) * t)
-            sy = y + int(h * s / steps)
-            ey = y + int(h * (s + 1) / steps)
-            draw.rectangle([x, sy, x + w, ey], fill=f"#{cr:02x}{cg:02x}{cb:02x}")
-
-        # 底部 accent 線條
-        accent = cell["accent"]
-        draw.rectangle([x, y + h - 5, x + w, y + h], fill=accent)
-
-        # 圖標圓形背景
-        cx = x + w // 2
-        cy_icon = y + h // 2 - 120
-        circle_r = 70
-        draw.ellipse([cx - circle_r, cy_icon - circle_r, cx + circle_r, cy_icon + circle_r], fill="#c8a88240", outline=accent, width=3)
-
-        # 圖標文字
-        try:
-            ib = draw.textbbox((0, 0), cell["icon"], font=font_icon)
-            iw = ib[2] - ib[0]
-            ih = ib[3] - ib[1]
-            draw.text((cx - iw // 2, cy_icon - ih // 2), cell["icon"], fill=accent, font=font_icon)
-        except Exception:
-            pass
-
-        # 主標題
-        try:
-            tb = draw.textbbox((0, 0), cell["title"], font=font_title)
-            tw = tb[2] - tb[0]
-            title_y = y + h // 2 + 10
-            draw.text((cx - tw // 2, title_y), cell["title"], fill="#f5ede0", font=font_title)
-        except Exception:
-            pass
-
-        # 副標題
-        try:
-            sb = draw.textbbox((0, 0), cell["sub"], font=font_sub)
-            sw = sb[2] - sb[0]
-            sub_y = y + h // 2 + 110
-            draw.text((cx - sw // 2, sub_y), cell["sub"], fill="#c8b8a0", font=font_sub)
-        except Exception:
-            pass
-
-    # 頂部品牌裝飾線
-    draw.rectangle([0, 0, W, 4], fill="#c8a882")
-
-    # 右上角 LYS 品牌字
-    try:
-        brand_font = _load_font(48)
-        bb = draw.textbbox((0, 0), "LYS", font=brand_font)
-        bw = bb[2] - bb[0]
-        draw.text((W - bw - 30, 15), "LYS", fill="#c8a882", font=brand_font)
-    except Exception:
-        pass
-
+    # Step 3: 載入自訂底圖並調整為 2500x1686
     import io
+    W, H = 2500, 1686
+
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "richmenu.png")
+    if not os.path.exists(img_path):
+        return jsonify({"error": "richmenu.png not found"}), 500
+
+    img = Image.open(img_path).convert("RGB")
+    if img.size != (W, H):
+        img = img.resize((W, H), Image.LANCZOS)
+
     img_bytes = io.BytesIO()
     img.save(img_bytes, format="PNG")
     img_bytes.seek(0)
