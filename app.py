@@ -1104,40 +1104,8 @@ def webhook():
             }])
             continue
 
-        # ----- 4. 檢查：找真人（暫停 AI + 通知老闆） -----
-        current_triggers = json.loads(get_setting('trigger_words', json.dumps(TRIGGER_WORDS)))
-        if any(word in user_message for word in current_triggers):
-            if BOSS_USER_ID and user_id == BOSS_USER_ID:
-                reply_to_user(reply_token, "老闆您好！這是轉人工功能，客人觸發時您會收到通知")
-                continue
-            paused_users.add(user_id)
-            reply_to_user(reply_token, "好的！我馬上幫您通知老師，請稍候片刻，我們會盡快與您聯繫")
-            customer_name = user_profiles[user_id]["name"]
-            time_str = user_profiles[user_id]["lastTime"]
-            notify_boss(customer_name, user_message, time_str)
-            continue
-
-        # ----- 5. 檢查：暫停中的用戶 -----
-        if user_id in paused_users:
-            continue
-
-        # ----- 6. AI 回覆 + 見證卡片觸發 -----
-        try:
-            ai_response = ask_claude(user_message)
-            reply_to_user(reply_token, ai_response)
-
-            user_message_count[user_id] = user_message_count.get(user_id, 0) + 1
-            if user_message_count[user_id] == 3 and user_id not in testimonial_sent:
-                testimonial_sent.add(user_id)
-                timer = threading.Timer(3.0, push_flex, args=[user_id, build_testimonial_flex()])
-                timer.daemon = True
-                timer.start()
-
-        except Exception as e:
-            log_msg = f"[ERROR] Claude API: {str(e)}"
-            print(log_msg, flush=True)
-            app_logs.append({"time": datetime.now().strftime("%m/%d %H:%M:%S"), "msg": log_msg})
-            reply_to_user(reply_token, "抱歉，系統暫時忙碌中，請稍後再試或直接撥打 0916-660-072")
+        # ----- 4. 其他訊息：不做 AI 回覆，引導使用選單 -----
+        reply_to_user(reply_token, "請使用下方選單功能，或直接撥打 0916-660-072 聯繫我們哦！")
 
     return jsonify({"status": "ok"})
 
