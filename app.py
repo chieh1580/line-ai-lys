@@ -1104,8 +1104,7 @@ def webhook():
             }])
             continue
 
-        # ----- 4. 其他訊息：不做 AI 回覆，引導使用選單 -----
-        reply_to_user(reply_token, "請使用下方選單功能，或直接撥打 0916-660-072 聯繫我們哦！")
+        # ----- 4. 其他訊息：不回覆，交由業主自行處理 -----
 
     return jsonify({"status": "ok"})
 
