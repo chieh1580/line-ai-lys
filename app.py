@@ -1233,5 +1233,30 @@ def setup_richmenu():
     return jsonify({"status": "ok", "richMenuId": richmenu_id, "message": "Rich Menu 建立完成！"})
 
 
+@app.route("/delete-richmenu")
+def delete_richmenu():
+    """刪除 API 設定的預設 Rich Menu，讓 LINE 後台設定的圖文選單生效"""
+    if request.cookies.get("admin_auth") != ADMIN_PASSWORD:
+        return jsonify({"error": "unauthorized"}), 401
+
+    headers = {"Authorization": f"Bearer {LINE_TOKEN}"}
+
+    # 取得目前 API 預設的 Rich Menu
+    old = requests.get("https://api.line.me/v2/bot/user/all/richmenu", headers=headers, timeout=10)
+    if old.status_code != 200:
+        return jsonify({"status": "ok", "message": "目前沒有透過 API 設定的預設圖文選單"})
+
+    old_id = old.json().get("richMenuId")
+    if not old_id:
+        return jsonify({"status": "ok", "message": "目前沒有透過 API 設定的預設圖文選單"})
+
+    # 取消預設
+    requests.delete(f"https://api.line.me/v2/bot/user/all/richmenu", headers=headers, timeout=10)
+    # 刪除 Rich Menu 物件
+    requests.delete(f"https://api.line.me/v2/bot/richmenu/{old_id}", headers=headers, timeout=10)
+
+    return jsonify({"status": "ok", "message": f"已刪除 API 圖文選單 ({old_id})，LINE 後台設定的選單將會生效"})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
