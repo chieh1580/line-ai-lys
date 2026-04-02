@@ -570,6 +570,55 @@ def build_quiz_result_flex(teacher, q1, q2, q3):
     }
 
 
+FAQ_ANSWERS = {
+    "FAQ_Q1": "按摩主要是放鬆肌肉層，而「撥經」是深層調理經絡與筋膜。透過專業手法與專用工具，疏通堆積的氣結與廢物，從源頭瓦解痠痛！",
+    "FAQ_Q2": "感受因人而異喔！當經絡嚴重阻塞時，觸碰會有痠、麻、脹的感覺。老師會依據您的耐受度調整力道，不會硬推。部分體質撥完後會有微紅或輕微痧點，這屬於正常的代謝現象，通常 3-5 天會自然退去。",
+    "FAQ_Q3": "① 體驗前一小時請勿過飽。\n② 體驗後建議多喝溫開水，加速身體代謝循環。\n③ 撥經當晚洗澡水溫不宜過高，並避免受涼風吹。\n④ 懷孕、凝血功能異常或皮膚有傷口者請先告知。",
+    "FAQ_Q4": "如果是為了調理長期痠痛，初期建議每 7-10 天施作一次，密集疏通阻塞；進入保養期後，可延長至 2-3 週一次，維持身體經絡通暢，遠離慢性疲勞！",
+    "FAQ_Q5": "可以的！身體經絡暢通了，氣血循環變好，臉部自然紅潤。我們的「身體撥經」能改善氣色，搭配「臉部深層補水」，讓效果加乘，由內而外透出光澤。",
+}
+
+FAQ_TITLES = {
+    "FAQ_Q1": "撥經是什麼？跟按摩有什麼不同？",
+    "FAQ_Q2": "撥經會很痛嗎？會不會黑青？",
+    "FAQ_Q3": "第一次體驗要注意什麼？",
+    "FAQ_Q4": "撥經多久做一次比較好？",
+    "FAQ_Q5": "撥經真的可以美容補水嗎？",
+}
+
+
+def build_faq_menu_flex():
+    """撥經解惑室 — FAQ 選單"""
+    buttons = []
+    for key, title in FAQ_TITLES.items():
+        buttons.append({"type": "button", "action": {"type": "message", "label": title, "text": key}, "style": "secondary", "height": "sm"})
+    return {
+        "type": "flex", "altText": "撥經解惑室",
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": "撥經解惑室", "weight": "bold", "size": "lg", "color": "#6b3a63"},
+            {"type": "text", "text": "點選您想了解的問題吧！", "size": "sm", "color": "#666666", "margin": "md"},
+            {"type": "box", "layout": "vertical", "margin": "lg", "spacing": "sm", "contents": buttons}
+        ]}}
+    }
+
+
+def build_faq_answer_flex(faq_key):
+    """FAQ 單題回覆卡片"""
+    title = FAQ_TITLES.get(faq_key, "")
+    answer = FAQ_ANSWERS.get(faq_key, "")
+    return {
+        "type": "flex", "altText": title,
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": title, "weight": "bold", "size": "md", "color": "#6b3a63", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": answer, "wrap": True, "size": "sm", "color": "#555555", "margin": "md"},
+            {"type": "separator", "margin": "lg"},
+            {"type": "button", "action": {"type": "message", "label": "看其他問題", "text": "撥經解惑室"}, "style": "link", "color": "#8b5e83", "margin": "md", "height": "sm"},
+            {"type": "button", "action": {"type": "uri", "label": "立即預約體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "margin": "sm", "height": "sm"}
+        ]}}
+    }
+
+
 def build_booking_start_flex():
     """預約撥經 — 第一步：詢問姓名"""
     return {
@@ -997,7 +1046,17 @@ def webhook():
             reply_messages(reply_token, [build_welcome_flex()])
             continue
 
-        # ----- 0c. 測驗關鍵字：啟動專屬測驗 -----
+        # ----- 0c. 撥經解惑室 -----
+        if user_message in ("撥經解惑室", "撥經是什麼？會痛嗎？", "常見問題"):
+            reply_messages(reply_token, [build_faq_menu_flex()])
+            continue
+
+        # ----- 0d. FAQ 回覆 -----
+        if user_message in FAQ_ANSWERS:
+            reply_messages(reply_token, [build_faq_answer_flex(user_message)])
+            continue
+
+        # ----- 0e. 測驗關鍵字：啟動專屬測驗 -----
         if any(kw in user_message for kw in QUIZ_KEYWORDS):
             user_state[user_id] = {"flow": "quiz", "step": "q1"}
             user_quiz_data[user_id] = {}
