@@ -484,7 +484,7 @@ def build_welcome_flex():
                         "type": "box", "layout": "horizontal", "spacing": "sm", "margin": "sm",
                         "contents": [
                             {"type": "button", "action": {"type": "message", "label": "新客體驗價", "text": "第一次去有什麼推薦的嗎？"}, "style": "primary", "color": "#c8a0c0", "height": "sm"},
-                            {"type": "button", "action": {"type": "message", "label": "預約撥經", "text": "我想預約"}, "style": "primary", "color": "#d4766a", "height": "sm"}
+                            {"type": "button", "action": {"type": "uri", "label": "預約撥經", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#d4766a", "height": "sm"}
                         ]
                     },
                     {"type": "separator", "margin": "lg"},
@@ -564,7 +564,7 @@ def build_quiz_result_flex(teacher, q1, q2, q3):
                 {"type": "text", "text": f"為您推薦：{teacher}", "weight": "bold", "size": "md", "color": "#6b3a63"},
                 {"type": "text", "text": f"新客首次體驗「背部鬆經」\n60 分鐘只要 1,280 元！", "wrap": True, "size": "sm", "color": "#555555", "margin": "sm"}
             ]},
-            {"type": "button", "action": {"type": "message", "label": "立即預約體驗", "text": "我想預約"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"},
+            {"type": "button", "action": {"type": "uri", "label": "立即預約體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"},
             {"type": "button", "action": {"type": "message", "label": "想先了解更多", "text": "你們有什麼服務？價格怎麼算？"}, "style": "link", "color": "#8b5e83", "margin": "sm", "height": "sm"}
         ]}}
     }
@@ -705,7 +705,7 @@ def build_testimonial_flex():
                         ]
                     },
                     {"type": "separator", "margin": "lg"},
-                    {"type": "button", "action": {"type": "message", "label": "我也想體驗", "text": "我想預約"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"}
+                    {"type": "button", "action": {"type": "uri", "label": "我也想體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"}
                 ],
                 "paddingAll": "16px"
             }
@@ -808,7 +808,7 @@ def build_guided_flex(user_message):
                     {"type": "separator", "margin": "lg"},
                     {"type": "text", "text": "繼續了解", "weight": "bold", "size": "sm", "margin": "lg", "color": "#2d1f14"},
                     {"type": "box", "layout": "vertical", "margin": "md", "spacing": "sm", "contents": other_buttons + [
-                        {"type": "button", "action": {"type": "message", "label": "我想預約體驗", "text": "我想預約"}, "style": "primary", "color": "#8b5e83", "height": "sm"}
+                        {"type": "button", "action": {"type": "uri", "label": "我想預約體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "height": "sm"}
                     ]}
                 ],
                 "paddingAll": "16px"
@@ -856,7 +856,7 @@ def send_followup(user_id, msg_type):
             "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
                 {"type": "text", "text": "忙碌了一週，該犒賞自己了！", "weight": "bold", "size": "md", "color": "#6b3a63"},
                 {"type": "text", "text": "LYS 美妍SPA館在中壢志航街，交通方便～\n新客體驗 1,280 元起，給自己一個放鬆的機會吧！", "wrap": True, "size": "sm", "color": "#666666", "margin": "md"},
-                {"type": "button", "action": {"type": "message", "label": "立即預約體驗", "text": "我想預約"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"}
+                {"type": "button", "action": {"type": "uri", "label": "立即預約體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"}
             ]}}
         }
     }
@@ -1092,11 +1092,16 @@ def webhook():
             reply_messages(reply_token, [build_guided_flex(user_message)])
             continue
 
-        # ----- 3. 檢查：預約關鍵字 -----
+        # ----- 3. 檢查：預約關鍵字 → 直接導向 EZpretty -----
         if any(kw in user_message for kw in BOOKING_KEYWORDS):
-            user_state[user_id] = {"flow": "collecting_booking", "step": "name"}
-            user_booking_data[user_id] = {}
-            reply_messages(reply_token, [build_booking_start_flex()])
+            reply_messages(reply_token, [{
+                "type": "flex", "altText": "點這裡立即預約！",
+                "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+                    {"type": "text", "text": "太好了！馬上幫您安排 ✨", "weight": "bold", "size": "md", "color": "#6b3a63"},
+                    {"type": "text", "text": "請點擊下方按鈕，到我們的預約系統選擇方便的時間哦！", "wrap": True, "size": "sm", "color": "#666666", "margin": "md"},
+                    {"type": "button", "action": {"type": "uri", "label": "立即線上預約", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"}
+                ]}}
+            }])
             continue
 
         # ----- 4. 檢查：找真人（暫停 AI + 通知老闆） -----
@@ -1299,7 +1304,7 @@ def setup_richmenu():
         "chatBarText": "點我展開選單",
         "areas": [
             {"bounds": {"x": 0, "y": 0, "width": 833, "height": 843},
-             "action": {"type": "message", "text": "我想預約"}},
+             "action": {"type": "uri", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}},
             {"bounds": {"x": 833, "y": 0, "width": 834, "height": 843},
              "action": {"type": "message", "text": "你們有什麼服務？價格怎麼算？"}},
             {"bounds": {"x": 1667, "y": 0, "width": 833, "height": 843},
