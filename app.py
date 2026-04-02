@@ -29,12 +29,17 @@ user_profiles = {}
 app_logs = []
 user_state = {}           # userId -> {"flow": "collecting_booking", "step": "name"}
 user_booking_data = {}    # userId -> {"name": ..., "phone": ..., "time": ...}
+user_quiz_data = {}       # userId -> {"q1": ..., "q2": ..., "q3": ...}
 user_message_count = {}   # userId -> int
 testimonial_sent = set()
 welcome_sent = set()
 
 TRIGGER_WORDS = ["找真人", "找人工", "找客服", "找老師", "真人", "人工"]
 BOOKING_KEYWORDS = ["我要預約", "我想預約", "預約撥經", "我要預約撥經", "我想體驗", "預約體驗"]
+QUIZ_KEYWORDS = ["開始測驗", "開始我的專屬測驗", "專屬測驗"]
+
+# 老師輪流分配清單
+TEACHER_ROTATION = ["好羚老師", "微雅老師", "懿珊老師", "家媛老師", "33老師", "Charlotte老師"]
 
 SYSTEM_PROMPT = """你是「小美」，LYS美妍SPA館的專業AI客服。語氣親切溫柔、像好姊妹聊天，讓客人感覺被重視、被照顧。
 
@@ -136,6 +141,14 @@ def set_setting(key, value):
 
 # 啟動時載入已發送歡迎卡片的用戶清單
 welcome_sent = _load_welcome_sent()
+
+
+def _get_next_teacher():
+    """輪流分配老師，計數器持久化"""
+    idx = int(get_setting("teacher_rotation_index", 0))
+    teacher = TEACHER_ROTATION[idx % len(TEACHER_ROTATION)]
+    set_setting("teacher_rotation_index", (idx + 1) % len(TEACHER_ROTATION))
+    return teacher
 
 
 # ===== 後台 HTML =====
@@ -475,11 +488,85 @@ def build_welcome_flex():
                         ]
                     },
                     {"type": "separator", "margin": "lg"},
-                    {"type": "text", "text": "也可以直接打字問我任何問題哦！", "wrap": True, "size": "xs", "color": "#999999", "margin": "lg"}
+                    {"type": "button", "action": {"type": "message", "label": "🔮 開始我的專屬測驗", "text": "開始我的專屬測驗"}, "style": "primary", "color": "#d4766a", "margin": "lg", "height": "sm"},
+                    {"type": "text", "text": "也可以直接打字問我任何問題哦！", "wrap": True, "size": "xs", "color": "#999999", "margin": "sm"}
                 ],
                 "paddingAll": "20px"
             }
         }
+    }
+
+
+def build_quiz_q1_flex():
+    """測驗第 1 題"""
+    return {
+        "type": "flex", "altText": "專屬測驗 Q1",
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": "專屬測驗 ①/③", "size": "xs", "color": "#8b5e83", "weight": "bold"},
+            {"type": "text", "text": "最近身體上，最有感的是哪一種？", "weight": "bold", "size": "md", "color": "#2d1f14", "margin": "md", "wrap": True},
+            {"type": "box", "layout": "vertical", "margin": "lg", "spacing": "sm", "contents": [
+                {"type": "button", "action": {"type": "message", "label": "肩頸僵硬痠痛", "text": "肩頸僵硬痠痛"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "腰背緊繃不適", "text": "腰背緊繃不適"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "腿部沉重水腫", "text": "腿部沉重水腫"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "整個人疲憊無力", "text": "整個人疲憊無力"}, "style": "secondary", "height": "sm"}
+            ]}
+        ]}}
+    }
+
+
+def build_quiz_q2_flex():
+    """測驗第 2 題"""
+    return {
+        "type": "flex", "altText": "專屬測驗 Q2",
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": "專屬測驗 ②/③", "size": "xs", "color": "#8b5e83", "weight": "bold"},
+            {"type": "text", "text": "最近的生活節奏呢？", "weight": "bold", "size": "md", "color": "#2d1f14", "margin": "md", "wrap": True},
+            {"type": "box", "layout": "vertical", "margin": "lg", "spacing": "sm", "contents": [
+                {"type": "button", "action": {"type": "message", "label": "忙碌高壓，幾乎沒休息", "text": "忙碌高壓，幾乎沒休息"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "還好，但睡眠品質不太好", "text": "還好，但睡眠品質不太好"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "作息正常，想保養放鬆", "text": "作息正常，想保養放鬆"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "長時間久坐／久站", "text": "長時間久坐／久站"}, "style": "secondary", "height": "sm"}
+            ]}
+        ]}}
+    }
+
+
+def build_quiz_q3_flex():
+    """測驗第 3 題"""
+    return {
+        "type": "flex", "altText": "專屬測驗 Q3",
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": "專屬測驗 ③/③", "size": "xs", "color": "#8b5e83", "weight": "bold"},
+            {"type": "text", "text": "做完撥經後，最渴望感受到的是什麼？", "weight": "bold", "size": "md", "color": "#2d1f14", "margin": "md", "wrap": True},
+            {"type": "box", "layout": "vertical", "margin": "lg", "spacing": "sm", "contents": [
+                {"type": "button", "action": {"type": "message", "label": "全身輕鬆、不再緊繃", "text": "全身輕鬆、不再緊繃"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "睡一場好覺", "text": "睡一場好覺"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "氣色變好、更有精神", "text": "氣色變好、更有精神"}, "style": "secondary", "height": "sm"},
+                {"type": "button", "action": {"type": "message", "label": "好好寵愛自己一下", "text": "好好寵愛自己一下"}, "style": "secondary", "height": "sm"}
+            ]}
+        ]}}
+    }
+
+
+def build_quiz_result_flex(teacher, q1, q2, q3):
+    """測驗結果卡片"""
+    # 根據回答生成小結
+    body_map = {"肩頸僵硬痠痛": "肩頸", "腰背緊繃不適": "腰背", "腿部沉重水腫": "腿部", "整個人疲憊無力": "全身"}
+    body_part = body_map.get(q1, "身體")
+
+    return {
+        "type": "flex", "altText": "測驗結果出爐！",
+        "contents": {"type": "bubble", "body": {"type": "box", "layout": "vertical", "paddingAll": "20px", "contents": [
+            {"type": "text", "text": "✨ 分析完成！", "weight": "bold", "size": "lg", "color": "#6b3a63"},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"根據您的回答，您目前{body_part}比較需要照顧，加上生活節奏「{q2}」，很適合透過撥經來好好舒緩放鬆一下哦！", "wrap": True, "size": "sm", "color": "#666666", "margin": "md"},
+            {"type": "box", "layout": "vertical", "margin": "lg", "paddingAll": "15px", "backgroundColor": "#faf5f9", "cornerRadius": "10px", "contents": [
+                {"type": "text", "text": f"為您推薦：{teacher}", "weight": "bold", "size": "md", "color": "#6b3a63"},
+                {"type": "text", "text": f"新客首次體驗「背部鬆經」\n60 分鐘只要 1,280 元！", "wrap": True, "size": "sm", "color": "#555555", "margin": "sm"}
+            ]},
+            {"type": "button", "action": {"type": "message", "label": "立即預約體驗", "text": "我想預約"}, "style": "primary", "color": "#8b5e83", "margin": "lg", "height": "sm"},
+            {"type": "button", "action": {"type": "message", "label": "想先了解更多", "text": "你們有什麼服務？價格怎麼算？"}, "style": "link", "color": "#8b5e83", "margin": "sm", "height": "sm"}
+        ]}}
     }
 
 
@@ -910,7 +997,42 @@ def webhook():
             reply_messages(reply_token, [build_welcome_flex()])
             continue
 
-        # ----- 1. 檢查：是否在預約資料收集流程中 -----
+        # ----- 0c. 測驗關鍵字：啟動專屬測驗 -----
+        if any(kw in user_message for kw in QUIZ_KEYWORDS):
+            user_state[user_id] = {"flow": "quiz", "step": "q1"}
+            user_quiz_data[user_id] = {}
+            reply_messages(reply_token, [build_quiz_q1_flex()])
+            continue
+
+        # ----- 1a. 檢查：是否在測驗流程中 -----
+        if user_id in user_state and user_state[user_id].get("flow") == "quiz":
+            step = user_state[user_id].get("step")
+
+            if step == "q1":
+                user_quiz_data.setdefault(user_id, {})
+                user_quiz_data[user_id]["q1"] = user_message
+                user_state[user_id]["step"] = "q2"
+                reply_messages(reply_token, [build_quiz_q2_flex()])
+                continue
+
+            elif step == "q2":
+                user_quiz_data[user_id]["q2"] = user_message
+                user_state[user_id]["step"] = "q3"
+                reply_messages(reply_token, [build_quiz_q3_flex()])
+                continue
+
+            elif step == "q3":
+                user_quiz_data[user_id]["q3"] = user_message
+                del user_state[user_id]
+                data = user_quiz_data[user_id]
+                teacher = _get_next_teacher()
+                log_msg = f"[QUIZ] {user_id[-6:]} 完成測驗，分配 {teacher}"
+                print(log_msg, flush=True)
+                app_logs.append({"time": datetime.now().strftime("%m/%d %H:%M:%S"), "msg": log_msg})
+                reply_messages(reply_token, [build_quiz_result_flex(teacher, data["q1"], data["q2"], data["q3"])])
+                continue
+
+        # ----- 1b. 檢查：是否在預約資料收集流程中 -----
         if user_id in user_state and user_state[user_id].get("flow") == "collecting_booking":
             step = user_state[user_id].get("step")
 
