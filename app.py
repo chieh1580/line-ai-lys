@@ -1304,17 +1304,17 @@ def setup_richmenu():
         "chatBarText": "點我展開選單",
         "areas": [
             {"bounds": {"x": 0, "y": 0, "width": 833, "height": 843},
-             "action": {"type": "uri", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}},
+             "action": {"type": "message", "text": "本月活動"}},
             {"bounds": {"x": 833, "y": 0, "width": 834, "height": 843},
-             "action": {"type": "message", "text": "你們有什麼服務？價格怎麼算？"}},
+             "action": {"type": "message", "text": "開始我的專屬測驗"}},
             {"bounds": {"x": 1667, "y": 0, "width": 833, "height": 843},
-             "action": {"type": "message", "text": "第一次去有什麼推薦的嗎？"}},
-            {"bounds": {"x": 0, "y": 843, "width": 833, "height": 843},
              "action": {"type": "message", "text": "請問你們的地址在哪裡？怎麼去？"}},
+            {"bounds": {"x": 0, "y": 843, "width": 833, "height": 843},
+             "action": {"type": "uri", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}},
             {"bounds": {"x": 833, "y": 843, "width": 834, "height": 843},
              "action": {"type": "message", "text": "撥經是什麼？會痛嗎？"}},
             {"bounds": {"x": 1667, "y": 843, "width": 833, "height": 843},
-             "action": {"type": "message", "text": "有什麼套餐可以選？"}}
+             "action": {"type": "message", "text": "我想學撥經"}}
         ]
     }
 
