@@ -611,6 +611,41 @@ def build_faq_answer_flex(question):
     }
 
 
+def build_pricelist_menu_flex():
+    """價目表及更多問題 — 主選單卡片"""
+    return {
+        "type": "flex",
+        "altText": "價目表及更多問題",
+        "contents": {
+            "type": "bubble",
+            "header": {
+                "type": "box", "layout": "vertical",
+                "contents": [
+                    {"type": "text", "text": "價目表及更多問題", "weight": "bold", "size": "lg", "color": "#6B4F3A"},
+                    {"type": "text", "text": "想了解什麼呢？點選下方按鈕快速查看", "size": "xs", "color": "#999999", "margin": "sm"}
+                ],
+                "paddingAll": "16px", "backgroundColor": "#FAF5EC"
+            },
+            "body": {
+                "type": "box", "layout": "vertical", "paddingAll": "16px", "spacing": "sm",
+                "contents": [
+                    {"type": "text", "text": "💰 價格資訊", "weight": "bold", "size": "sm", "color": "#6B4F3A"},
+                    {"type": "box", "layout": "horizontal", "spacing": "sm", "margin": "sm", "contents": [
+                        {"type": "button", "action": {"type": "message", "label": "單項服務價格", "text": "你們有什麼服務？價格怎麼算？"}, "style": "primary", "color": "#B08D6E", "height": "sm"},
+                        {"type": "button", "action": {"type": "message", "label": "療癒套餐方案", "text": "有什麼套餐可以選？"}, "style": "primary", "color": "#C4A47A", "height": "sm"}
+                    ]},
+                    {"type": "button", "action": {"type": "message", "label": "新客體驗價", "text": "第一次去有什麼推薦的嗎？"}, "style": "primary", "color": "#D4BFA0", "height": "sm", "margin": "sm"},
+                    {"type": "separator", "margin": "lg"},
+                    {"type": "text", "text": "❓ 常見問題", "weight": "bold", "size": "sm", "color": "#6B4F3A", "margin": "lg"},
+                    {"type": "button", "action": {"type": "message", "label": "撥經解惑室", "text": "撥經解惑室"}, "style": "secondary", "height": "sm", "margin": "sm"},
+                    {"type": "separator", "margin": "lg"},
+                    {"type": "button", "action": {"type": "uri", "label": "我想預約體驗", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#C47F5A", "height": "sm", "margin": "lg"}
+                ]
+            }
+        }
+    }
+
+
 def build_booking_start_flex():
     """預約撥經 — 第一步：詢問姓名"""
     return {
@@ -1094,7 +1129,12 @@ def webhook():
             reply_messages(reply_token, [build_welcome_flex()])
             continue
 
-        # ----- 0c. 撥經解惑室 -----
+        # ----- 0c. 價目表及更多問題 -----
+        if user_message == "價目表及更多問題":
+            reply_messages(reply_token, [build_pricelist_menu_flex()])
+            continue
+
+        # ----- 0c2. 撥經解惑室 -----
         if user_message in ("撥經解惑室", "撥經是什麼？會痛嗎？", "常見問題"):
             reply_messages(reply_token, [build_faq_menu_flex()])
             continue
@@ -1389,7 +1429,7 @@ def setup_richmenu():
             {"bounds": {"x": 0, "y": 843, "width": 833, "height": 843},
              "action": {"type": "uri", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}},
             {"bounds": {"x": 833, "y": 843, "width": 834, "height": 843},
-             "action": {"type": "message", "text": "撥經是什麼？會痛嗎？"}},
+             "action": {"type": "message", "text": "價目表及更多問題"}},
             {"bounds": {"x": 1667, "y": 843, "width": 833, "height": 843},
              "action": {"type": "message", "text": "我想學撥經"}}
         ]
