@@ -47,7 +47,7 @@ SYSTEM_PROMPT = """你是「小美」，LYS美妍SPA館的專業AI客服。語�
 店名：LYS美妍｜美容撥經｜撥經教學｜溫和式舒壓護理
 地址：桃園市中壢區志航街217號
 電話：0916-660-072
-營業時間：每天 10:00 - 20:00
+營業時間：每天 9:00 - 19:00
 預約方式：透過LINE官方帳號選單到Ezpretty進行預約
 
 【師資團隊】
@@ -59,20 +59,20 @@ SYSTEM_PROMPT = """你是「小美」，LYS美妍SPA館的專業AI客服。語�
 
 【單項價格】
 新客順氣鬆經 60分鐘 原價1,280元（會員價0元，僅限第一次）
-臉部撥經 90分鐘 原價3,200元（會員2,880／VIP 2,560）
-背部撥經 90分鐘 原價2,300元（會員2,070／VIP 1,840）
-腿部撥經 90分鐘 原價2,300元（會員2,070／VIP 1,840）
-胸部撥筋 45分鐘 原價1,500元（會員1,350／VIP 1,200）
-腹部撥經 45分鐘 原價1,500元（會員1,350／VIP 1,200）
-胯部八髎撥經 30分鐘 原價1,000元（會員900／VIP 800）
-無煙艾灸 60分鐘 原價1,100元（會員990／VIP 880）
-循環美容儀 30分鐘 原價500元（會員450／VIP 400）
+臉部撥經 90分鐘 原價3,200元（會員9折 2,880）
+背部撥經 90分鐘 原價2,300元（會員9折 2,070）
+腿部撥經 90分鐘 原價2,300元（會員9折 2,070）
+胸部撥筋 45分鐘 原價1,500元（會員9折 1,350）
+腹部撥經 45分鐘 原價1,500元（會員9折 1,350）
+胯部八髎撥經 30分鐘 原價1,000元（會員9折 900）
+無煙艾灸 60分鐘 原價1,100元（會員9折 990）
+循環美容儀 30分鐘 原價500元（會員9折 450）
 
 【療癒撥經套餐】
-A套餐：背／腿撥經 120分鐘 原價3,200元（會員2,880／VIP 2,560）
-B套餐：胸／腹撥經 90分鐘 原價2,900元（會員2,610／VIP 2,320）
-C套餐：背／腹撥經 135分鐘 原價3,600元（會員3,240／VIP 2,880）
-D套餐：背／胸撥經 135分鐘 原價3,600元（會員3,240／VIP 2,880）
+A套餐：背／腿撥經 120分鐘 原價3,200元（會員9折 2,880）
+B套餐：胸／腹撥經 90分鐘 原價2,900元（會員9折 2,610）
+C套餐：背／腹撥經 135分鐘 原價3,600元（會員9折 3,240）
+D套餐：背／胸撥經 135分鐘 原價3,600元（會員9折 3,240）
 
 【推薦首次體驗】
 新客推薦「新客順氣鬆經課」，60分鐘只要1,280元起，是認識撥經最好的入門課程！
@@ -803,7 +803,7 @@ GUIDED_BUTTONS = {
             "無煙艾灸　60min　1,100元起",
             "循環美容儀　30min　500元起",
             "",
-            "會員享9折，儲值VIP享8折！",
+            "會員享9折優惠！",
         ]
     },
     "第一次去有什麼推薦的嗎？": {
@@ -822,13 +822,13 @@ GUIDED_BUTTONS = {
             "辰玥老師、家媛老師",
             "",
             "地址：桃園市中壢區志航街217號",
-            "營業時間：每天 10:00 - 20:00",
+            "營業時間：每天 9:00 - 19:00",
         ]
     },
 }
 
 
-def _pkg_bubble(name, subtitle, desc, price, duration, member, vip, services):
+def _pkg_bubble(name, subtitle, desc, price, duration, member, services):
     """建立單個套餐 bubble"""
     svc_text = "\n".join(f"• {s}" for s in services)
     return {
@@ -849,16 +849,10 @@ def _pkg_bubble(name, subtitle, desc, price, duration, member, vip, services):
                     {"type": "text", "text": f"${price}", "weight": "bold", "size": "xxl", "color": "#6B4F3A", "flex": 0},
                     {"type": "text", "text": f"/{duration}", "size": "sm", "color": "#999999", "align": "start", "gravity": "bottom", "margin": "sm", "flex": 0}
                 ]},
-                {"type": "box", "layout": "horizontal", "spacing": "md", "contents": [
-                    {"type": "box", "layout": "vertical", "contents": [
-                        {"type": "text", "text": "會員", "size": "xxs", "color": "#999999", "align": "center"},
-                        {"type": "text", "text": f"${member}", "size": "sm", "weight": "bold", "color": "#B08D6E", "align": "center"}
-                    ], "flex": 1, "backgroundColor": "#FAF5EC", "cornerRadius": "6px", "paddingAll": "6px"},
-                    {"type": "box", "layout": "vertical", "contents": [
-                        {"type": "text", "text": "儲值VIP", "size": "xxs", "color": "#999999", "align": "center"},
-                        {"type": "text", "text": f"${vip}", "size": "sm", "weight": "bold", "color": "#C47F5A", "align": "center"}
-                    ], "flex": 1, "backgroundColor": "#FAF5EC", "cornerRadius": "6px", "paddingAll": "6px"}
-                ]},
+                {"type": "box", "layout": "vertical", "contents": [
+                    {"type": "text", "text": "會員9折", "size": "xxs", "color": "#999999", "align": "center"},
+                    {"type": "text", "text": f"${member}", "size": "sm", "weight": "bold", "color": "#B08D6E", "align": "center"}
+                ], "backgroundColor": "#FAF5EC", "cornerRadius": "6px", "paddingAll": "6px"},
                 {"type": "separator"},
                 {"type": "text", "text": "服務內容", "size": "xs", "weight": "bold", "color": "#6B4F3A"},
                 {"type": "text", "text": svc_text, "size": "xs", "color": "#666666", "wrap": True}
@@ -877,16 +871,16 @@ def build_package_carousel_flex():
     """套餐價目表 — 4 個套餐的輪播卡片"""
     bubbles = [
         _pkg_bubble("Package A", "背／腿 撥經", "從頭到腳完整護理，適合初次體驗或全身痠痛、循環不佳的客人",
-                     "3,200", "120 min", "2,880", "2,560",
+                     "3,200", "120 min", "2,880",
                      ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "足底撥經舒壓", "小腿舒壓撥經", "大腿雕塑撥經"]),
         _pkg_bubble("Package B", "胸／腹 撥經", "胸腹集中護理，適合想改善腹部緊繃與胸部不適的客人",
-                     "2,900", "90 min", "2,610", "2,320",
+                     "2,900", "90 min", "2,610",
                      ["胸部疏通撥經", "腹部雕塑撥經", "精油艾灸貼", "臍燭暖子宮"]),
         _pkg_bubble("Package C", "背／腹 撥經", "背部深層放鬆加腹部溫熱舒壓，適合久坐族、腰背痠痛的客人",
-                     "3,600", "135 min", "3,240", "2,880",
+                     "3,600", "135 min", "3,240",
                      ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "腹部雕塑撥經", "臍燭暖宮", "精油艾灸貼"]),
         _pkg_bubble("Package D", "背／胸 撥經", "背部全方位舒壓結合胸部疏通，適合上半身緊繃、長期姿勢不良的客人",
-                     "3,600", "135 min", "3,240", "2,880",
+                     "3,600", "135 min", "3,240",
                      ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "胸部疏通撥經"]),
     ]
     return {
