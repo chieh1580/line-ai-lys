@@ -64,8 +64,8 @@ SYSTEM_PROMPT = """你是「小美」，LYS美妍SPA館的專業AI客服。語�
 腿部撥經 90分鐘 原價2,300元（會員9折 2,070）
 胸部撥筋 45分鐘 原價1,500元（會員9折 1,350）
 腹部撥經 45分鐘 原價1,500元（會員9折 1,350）
-胯部八髎撥經 30分鐘 原價1,000元（會員9折 900）
-無煙艾灸 60分鐘 原價1,100元（會員9折 990）
+八膠課程 30分鐘 原價1,000元（會員9折 900）
+艾草精油芳療 60分鐘 原價1,100元（會員9折 990）
 循環美容儀 30分鐘 原價500元（會員9折 450）
 
 【療癒撥經套餐】
@@ -799,8 +799,8 @@ GUIDED_BUTTONS = {
             "腿部撥經　90min　2,300元起",
             "胸部撥筋　45min　1,500元起",
             "腹部撥經　45min　1,500元起",
-            "胯部八髎撥經　30min　1,000元起",
-            "無煙艾灸　60min　1,100元起",
+            "八膠課程　30min　1,000元起",
+            "艾草精油芳療　60min　1,100元起",
             "循環美容儀　30min　500元起",
             "",
             "會員享9折優惠！",
@@ -828,20 +828,26 @@ GUIDED_BUTTONS = {
 }
 
 
-def _pkg_bubble(name, subtitle, desc, price, duration, member, services):
+def _pkg_bubble(name, subtitle, desc, price, duration, member, services, image_url=None):
     """建立單個套餐 bubble"""
     svc_text = "\n".join(f"• {s}" for s in services)
-    return {
+    bubble = {
         "type": "bubble", "size": "kilo",
-        "header": {
-            "type": "box", "layout": "vertical",
-            "contents": [
-                {"type": "text", "text": name, "weight": "bold", "size": "lg", "color": "#FFFFFF"},
-                {"type": "text", "text": subtitle, "size": "xs", "color": "#F5E6D3"}
-            ],
-            "paddingAll": "16px", "backgroundColor": "#6B4F3A"
-        },
-        "body": {
+    }
+    if image_url:
+        bubble["hero"] = {
+            "type": "image", "url": image_url, "size": "full",
+            "aspectRatio": "1:1", "aspectMode": "cover"
+        }
+    bubble["header"] = {
+        "type": "box", "layout": "vertical",
+        "contents": [
+            {"type": "text", "text": name, "weight": "bold", "size": "lg", "color": "#FFFFFF"},
+            {"type": "text", "text": subtitle, "size": "xs", "color": "#F5E6D3"}
+        ],
+        "paddingAll": "16px", "backgroundColor": "#6B4F3A"
+    }
+    bubble["body"] = {
             "type": "box", "layout": "vertical", "spacing": "md", "paddingAll": "16px",
             "contents": [
                 {"type": "text", "text": desc, "size": "xs", "color": "#888888", "wrap": True},
@@ -858,30 +864,35 @@ def _pkg_bubble(name, subtitle, desc, price, duration, member, services):
                 {"type": "text", "text": svc_text, "size": "xs", "color": "#666666", "wrap": True}
             ]
         },
-        "footer": {
-            "type": "box", "layout": "vertical", "paddingAll": "12px",
-            "contents": [
-                {"type": "button", "action": {"type": "uri", "label": "立即預約", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#B08D6E", "height": "sm"}
-            ]
-        }
+    bubble["footer"] = {
+        "type": "box", "layout": "vertical", "paddingAll": "12px",
+        "contents": [
+            {"type": "button", "action": {"type": "uri", "label": "立即預約", "uri": "https://www.ezpretty.com.tw/ezpretty/aio#/5babc5749a6c9273ce0893bb9bd9b700"}, "style": "primary", "color": "#B08D6E", "height": "sm"}
+        ]
     }
+    return bubble
 
 
 def build_package_carousel_flex():
     """套餐價目表 — 4 個套餐的輪播卡片"""
+    base_url = "https://line-ai-lys-production.up.railway.app/images"
     bubbles = [
         _pkg_bubble("Package A", "背／腿 撥經", "從頭到腳完整護理，適合初次體驗或全身痠痛、循環不佳的客人",
                      "3,200", "120 min", "2,880",
-                     ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "足底撥經舒壓", "小腿舒壓撥經", "大腿雕塑撥經"]),
+                     ["頭部舒壓", "肩頸放鬆", "背部精雕", "臀部提拉", "腿部雕塑", "足底舒壓"],
+                     f"{base_url}/package_a.png"),
         _pkg_bubble("Package B", "胸／腹 撥經", "胸腹集中護理，適合想改善腹部緊繃與胸部不適的客人",
                      "2,900", "90 min", "2,610",
-                     ["胸部疏通撥經", "腹部雕塑撥經", "精油艾灸貼", "臍燭暖子宮"]),
+                     ["胸部疏通", "腹部雕塑", "精油艾草芳療", "暖宮課程"],
+                     f"{base_url}/package_b.png"),
         _pkg_bubble("Package C", "背／腹 撥經", "背部深層放鬆加腹部溫熱舒壓，適合久坐族、腰背痠痛的客人",
                      "3,600", "135 min", "3,240",
-                     ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "腹部雕塑撥經", "臍燭暖宮", "精油艾灸貼"]),
+                     ["頭部舒壓", "肩頸放鬆", "手部舒壓", "背部精雕", "臀部提拉", "腹部雕塑", "精油艾草芳療", "暖宮課程"],
+                     f"{base_url}/package_c.png"),
         _pkg_bubble("Package D", "背／胸 撥經", "背部全方位舒壓結合胸部疏通，適合上半身緊繃、長期姿勢不良的客人",
                      "3,600", "135 min", "3,240",
-                     ["頭部撥經舒壓", "肩頸撥經舒壓", "手部舒壓撥經", "背部精雕撥經", "臀部提臀撥經", "胸部疏通撥經"]),
+                     ["頭部舒壓", "肩頸放鬆", "手部紓壓", "背部精雕", "臀部提臀", "胸部疏通"],
+                     f"{base_url}/package_d.png"),
     ]
     return {
         "type": "flex",
@@ -1371,6 +1382,13 @@ def debug_logs():
 @app.route("/")
 def index():
     return jsonify({"status": "ok", "service": "LYS 美妍SPA館 LINE AI 客服"})
+
+
+@app.route("/images/<filename>")
+def serve_image(filename):
+    """提供套餐圖片給 LINE Flex Message 使用"""
+    from flask import send_from_directory
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), filename)
 
 
 # ===== Rich Menu 設定 =====
