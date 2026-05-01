@@ -1388,7 +1388,8 @@ def index():
 def serve_image(filename):
     """提供套餐圖片給 LINE Flex Message 使用"""
     from flask import send_from_directory
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), filename)
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+    return send_from_directory(static_dir, filename)
 
 
 # ===== Rich Menu 設定 =====
