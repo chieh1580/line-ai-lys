@@ -863,7 +863,7 @@ def _pkg_bubble(name, subtitle, desc, price, duration, member, services, image_u
                 {"type": "text", "text": "服務內容", "size": "xs", "weight": "bold", "color": "#6B4F3A"},
                 {"type": "text", "text": svc_text, "size": "xs", "color": "#666666", "wrap": True}
             ]
-        },
+        }
     bubble["footer"] = {
         "type": "box", "layout": "vertical", "paddingAll": "12px",
         "contents": [
